@@ -16,7 +16,11 @@
             </div>
             <div class="card-body">
                 {% for url in urls %}
-                    <h4 class="small font-weight-bold">{{ url.hash }} <span class="float-right">{{ url.percentUse }}%</span></h4>
+                    <h4 class="small font-weight-bold">
+                    <a target="_blank" href="{{ url.hash }}">{{ url.hash }}</a>
+                    <span class="float-right">{{ url.percentUse }}%</span>
+                    </h4>
+                    <h5 class="small font-weight-bold">{{ url.longUrl }}</h5>
                     <div class="progress mb-4">
                         <div class="progress-bar" role="progressbar" style="width: {{ url.percentUse }}%" aria-valuenow="{{ url.percentUse }}" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
@@ -30,7 +34,7 @@
         <div class="card shadow mb-4">
             <!-- Card Header - Dropdown -->
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Uso de estrategias</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Uso de estrategias %</h6>
             </div>
             <!-- Card Body -->
             <div class="card-body">

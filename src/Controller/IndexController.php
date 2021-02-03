@@ -24,9 +24,17 @@ class IndexController extends AbstractController
     }
     
     /**
-     * @Route("/{hash}", name="index")
+     * @Route("/", name="index")
      */
-    public function index(string $hash): Response
+    public function index() :Response
+    {
+        return $this->redirectToRoute('shortener');
+    }
+
+    /**
+     * @Route("/{hash}", name="hash")
+     */
+    public function hash(string $hash): Response
     {
         $url = $this->shortenedUrlService->getShortenedUrlByHashAndAddVisit($hash);
         
@@ -49,11 +57,10 @@ class IndexController extends AbstractController
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
                 $shortener = $form->getData();
-                $host = $request->getHttpHost();
                 $shortener->setHash(
                     \substr(
                         $shortener->getHash(),
-                        \strlen($host.'/')
+                        \strlen($this->getHttpHost($request))
                     )
                 );
 
@@ -79,9 +86,8 @@ class IndexController extends AbstractController
     public function urlShortenerGenerate(Request $request, int $strategy): Response
     {
         $hash = $this->strategyService->getHashFromStrategy($strategy);
-        $host = $request->getHttpHost();
         if (!empty($hash))
-            return new JsonResponse(['success' => true, 'hash' => $host.'/'.$hash]);
+            return new JsonResponse(['success' => true, 'hash' => $this->getHttpHost($request).$hash]);
         else
             return new JsonResponse(['success' => false]);
     }
@@ -89,16 +95,24 @@ class IndexController extends AbstractController
     /**
      * @Route("admin/statistics", name="statistics")
      */
-    public function statisticsPanel()
+    public function statisticsPanel(Request $request)
     {
         $urls = $this->shortenedUrlService->getTopMostVisitUrls();
         $strategies = $this->strategyService->getStrategiesToStaticsPanel();
 
-        // var_dump($strategies);
-        
+        foreach($urls as $url)
+        {
+            $url->setHash($this->getHttpHost($request).$url->getHash());
+        }
+
         return $this->render('index/statistics.html.twig', [
             'strategies' => $strategies,
             'urls' => $urls
         ]);
+    }
+
+    private function getHttpHost(Request $request)
+    {
+        return $request->getSchemeAndHttpHost().'/';
     }
 }
