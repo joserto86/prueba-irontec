@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Acortador URLs{% endblock %}
+
+{% block body %}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Acortador URLs</h1>
+</div>
+
+{% if result is not null %}
+    {% if result.success %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>La URL acortada se ha guardado correctamente</strong>
+            <button type="button" style="position: absolute;right: 1%;top: 10%;font-weight: bold;" class="btn-close btn" aria-label="Close">X</button>
+        </div>
+    {% else %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {% for message in result.messages %}
+                <strong>{{ message }}</strong>
+            {% endfor %}
+            <button type="button" style="position: absolute;right: 1%;top: 10%;font-weight: bold;" class="btn-close btn" aria-label="Close">X</button>
+        </div>
+    {% endif %}
+{% endif %}
+
+{{ form_start(form, {'attr': {'class' : 'needs-validation', 'novalidate':'novalidate'}}) }}
+
+    <div class="form-group col-md-6 has-validation">
+        {{ form_label(form.url, 'URL a acortar') }}
+        {{ form_widget(form.url,{ 'attr':
+            {
+                'class':'form-control',
+                'placeholder':'Introduce aqui tu url a acortar',
+            }})
+        }}
+        <div class="invalid-feedback">
+            Por favor, introduce una url válida
+        </div>
+    </div>
+
+    <div class="form-group col-md-6 has-validation">
+        {{ form_label(form.strategy, 'Estrategia a seguir') }}
+        {{ form_widget(form.strategy, { 'attr':
+            {
+                class:'form-control'
+            }})
+        }}
+        <div class="invalid-feedback">
+            Por favor, seleccione una estrategia a seguir
+        </div>
+
+    </div>
+
+    <div class="form-group row col-md-6 has-validation">
+        <div class="col-md-10">
+            {{ form_label(form.hash, 'Url acortada') }}
+            {{ form_widget(form.hash,{ 'attr':
+                {
+                    'class':'form-control',
+                    'style' : 'pointer-events:none'
+                }})
+            }}
+            <div class="invalid-feedback">
+                Por favor, genere una url acortada
+            </div>
+        </div>
+
+        <div class="col-md2">
+            <span id="generate" style="margin:31px 0 0 0;" class="btn btn-primary mb-3">Generar</button>
+        </div>
+    </div>
+
+    <div class="form-group col-md-6">
+        {{ form_widget(form.submit, { 'label': 'Guardar', 'attr': { 'class' : 'btn btn-primary' }}) }}
+    </div>
+
+{{ form_end(form) }}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+       var forms = document.querySelectorAll('.needs-validation')
+
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+
+        $('#generate').click(function(e){
+            e.preventDefault();
+            let strategy = $('#shortener_strategy').val();
+            $.ajax({
+                url: '/admin/shortener/generate/' + strategy,
+                type: 'GET',
+                success: function(data) {
+                    $("#shortener_hash").val(data.hash);
+                },
+            });
+        });
+
+        $('.alert .btn-close').click(function(e){
+            $(this).parent().fadeOut();
+        });
+    });
+</script>
+
+{% endblock %}
